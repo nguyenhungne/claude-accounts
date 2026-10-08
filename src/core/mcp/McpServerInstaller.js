@@ -17,14 +17,27 @@ export class McpServerInstaller {
 
   add(profile, server) {
     const owner = this.ownerOf(profile);
-    const result = this.runCommand(
-      this.locateClaude(),
-      ['mcp', 'add', '--transport', server.transport, '--scope', 'user', server.id, server.url],
-      { environment: this.environmentBuilder.processEnvironmentFor(owner) },
-    );
-    if (result.exitCode !== 0) {
-      throw new CctError(`could not add ${server.displayName}: ${result.errorOutput || result.output || `exit code ${result.exitCode}`}`);
-    }
+    const oauthArguments = server.oauth
+      ? ['--client-id', server.oauth.clientId, '--callback-port', String(server.oauth.callbackPort)]
+      : [];
+    this.#runClaude(owner, `add ${server.displayName}`, [
+      'mcp', 'add', '--transport', server.transport, '--scope', 'user', ...oauthArguments, server.id, server.url,
+    ]);
     return owner;
+  }
+
+  reconfigure(profile, server, configuredName) {
+    const owner = this.ownerOf(profile);
+    this.#runClaude(owner, `remove the old ${server.displayName} entry`, ['mcp', 'remove', '--scope', 'user', configuredName]);
+    return this.add(profile, server);
+  }
+
+  #runClaude(owner, action, args) {
+    const result = this.runCommand(this.locateClaude(), args, {
+      environment: this.environmentBuilder.processEnvironmentFor(owner),
+    });
+    if (result.exitCode !== 0) {
+      throw new CctError(`could not ${action}: ${result.errorOutput || result.output || `exit code ${result.exitCode}`}`);
+    }
   }
 }

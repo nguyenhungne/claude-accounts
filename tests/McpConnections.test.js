@@ -43,6 +43,12 @@ describe('McpConnectionInspector', () => {
     assert.equal(slack.state, McpConnectionState.NOT_CONNECTED);
   });
 
+  it('flags a server added without the OAuth client its provider requires', () => {
+    const connections = workspace.services.mcpConnections.describeAll(personal);
+    assert.equal(stateOf(connections, 'slack').needsReconfiguration, true);
+    assert.equal(stateOf(connections, 'notion').needsReconfiguration, false);
+  });
+
   it('treats a missing credentials file as signed out, except on macOS where tokens live in the Keychain', () => {
     const connections = workspace.services.mcpConnections.describeAll(Profile.createDefault());
     const expected = isMac ? McpConnectionState.UNKNOWN : McpConnectionState.NOT_CONNECTED;
@@ -79,6 +85,24 @@ describe('McpServerInstaller', () => {
       args: ['mcp', 'add', '--transport', 'http', '--scope', 'user', 'clickup', 'https://mcp.clickup.com/mcp'],
       configDirectory: workspace.defaultClaudeDirectory,
     });
+  });
+
+  it('passes the pre-registered OAuth client for providers without dynamic client registration', () => {
+    installerReturning(0).add(sharing, findMcpServer('slack'));
+    assert.deepEqual(calls.at(-1).args, [
+      'mcp', 'add', '--transport', 'http', '--scope', 'user',
+      '--client-id', '1601185624273.8899143856786', '--callback-port', '3118',
+      'slack', 'https://mcp.slack.com/mcp',
+    ]);
+  });
+
+  it('removes the stale entry before adding it again on reconfigure', () => {
+    const callCountBefore = calls.length;
+    installerReturning(0).reconfigure(sharing, findMcpServer('slack'), 'team-slack');
+    const [removal, addition] = calls.slice(callCountBefore).map(({ args }) => args);
+    assert.deepEqual(removal, ['mcp', 'remove', '--scope', 'user', 'team-slack']);
+    assert.deepEqual(addition.slice(0, 2), ['mcp', 'add']);
+    assert.equal(addition.at(-2), 'slack');
   });
 
   it('adds the server to the profile itself when it keeps MCP servers separate', () => {

@@ -15,6 +15,7 @@ export class LoginPlanner {
   plan(profile, targetId) {
     if (targetId === CLAUDE_LOGIN_TARGET.id) {
       return {
+        kind: 'command',
         ...CLAUDE_LOGIN_TARGET,
         executable: this.#locate(CLAUDE_LOGIN_TARGET),
         args: [],
@@ -26,7 +27,17 @@ export class LoginPlanner {
     if (!profile.isDefault && !profile.isolates(tool.id)) {
       throw new CctError(`'${tool.id}' is not separate in '${profile.name}', so logging in would switch the default account. Add it to "tools" in profile.json first.`);
     }
+    if (tool.usesTokenLoginFor(profile)) {
+      return {
+        kind: 'token',
+        id: tool.id,
+        displayName: tool.displayName,
+        ...tool.tokenLogin,
+        notice: `${tool.displayName} keeps one login per computer, so this profile uses a ${tool.tokenLogin.tokenLabel} (${tool.tokenLogin.environmentVariable})`,
+      };
+    }
     return {
+      kind: 'command',
       id: tool.id,
       displayName: tool.displayName,
       executable: this.#locate(tool),

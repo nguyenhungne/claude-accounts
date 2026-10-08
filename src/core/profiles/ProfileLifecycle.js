@@ -39,6 +39,13 @@ export class ProfileLifecycle {
     return { profile, warnings: this.synchronizer.synchronize(profile) };
   }
 
+  changeTools(profile, toolIds) {
+    if (profile.isDefault) throw new CctError('the default profile always uses your normal CLI logins');
+    const updated = new Profile({ ...profile, toolIds: this.#validatedToolIds(toolIds) });
+    this.profiles.save(updated);
+    return { profile: updated, warnings: this.synchronizer.synchronize(updated) };
+  }
+
   remove(profile) {
     if (profile.isDefault) throw new CctError('the default profile cannot be removed');
     this.linker.releaseAll(profile);

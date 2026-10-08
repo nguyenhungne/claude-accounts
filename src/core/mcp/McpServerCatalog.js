@@ -1,18 +1,32 @@
 class McpServer {
-  constructor({ id, displayName, url, iconId, description }) {
+  constructor({ id, displayName, url, iconId, description, oauth = null }) {
     this.id = id;
     this.displayName = displayName;
     this.url = url;
     this.iconId = iconId;
     this.description = description;
+    this.oauth = oauth;
     this.transport = 'http';
+  }
+
+  isConfiguredBy(definition) {
+    if (definition?.url !== this.url) return false;
+    if (!this.oauth) return true;
+    return definition.oauth?.clientId === this.oauth.clientId && definition.oauth?.callbackPort === this.oauth.callbackPort;
   }
 }
 
 export const MCP_SERVER_CATALOG = Object.freeze([
   new McpServer({ id: 'clickup', displayName: 'ClickUp', url: 'https://mcp.clickup.com/mcp', iconId: 'checklist', description: 'tasks, docs and comments' }),
   new McpServer({ id: 'notion', displayName: 'Notion', url: 'https://mcp.notion.com/mcp', iconId: 'book', description: 'pages and databases you share with it' }),
-  new McpServer({ id: 'slack', displayName: 'Slack', url: 'https://mcp.slack.com/mcp', iconId: 'comment-discussion', description: 'channels, threads and search' }),
+  new McpServer({
+    id: 'slack',
+    displayName: 'Slack',
+    url: 'https://mcp.slack.com/mcp',
+    iconId: 'comment-discussion',
+    description: 'channels, threads and search',
+    oauth: { clientId: '1601185624273.8899143856786', callbackPort: 3118 },
+  }),
   new McpServer({ id: 'atlassian', displayName: 'Atlassian', url: 'https://mcp.atlassian.com/v1/mcp', iconId: 'issues', description: 'Jira and Confluence' }),
   new McpServer({ id: 'linear', displayName: 'Linear', url: 'https://mcp.linear.app/mcp', iconId: 'tasklist', description: 'issues and projects' }),
   new McpServer({ id: 'figma', displayName: 'Figma', url: 'https://mcp.figma.com/mcp', iconId: 'symbol-color', description: 'design files and frames' }),

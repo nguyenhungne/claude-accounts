@@ -115,6 +115,16 @@ profile in this order:
 | kubectl | `.../<name>/kube/config` | `kube` |
 | npm (`.npmrc`, registry tokens) | `.../<name>/npmrc` | `npm` |
 | AWS CLI | `.../<name>/aws/` | `aws` |
+| Railway CLI | token in `.../<name>/railway/token`, passed as `RAILWAY_API_TOKEN` | `railway` |
+| Heroku CLI | token in `.../<name>/heroku/token`, passed as `HEROKU_API_KEY` | `heroku` |
+
+Railway and Heroku keep one login per computer (`~/.railway/config.json`, and the OS keychain or
+`~/.netrc` for Heroku), with no setting to move it. A profile therefore uses an account token instead:
+`cct login <profile> railway` (or **Log In** in the sidebar) asks for it with hidden input and stores it in
+the profile folder, readable by you only. Create the token at
+[railway.com/account/tokens](https://railway.com/account/tokens) or
+[dashboard.heroku.com/account/applications](https://dashboard.heroku.com/account/applications).
+The default profile keeps using `railway login` / `heroku login`.
 
 A tool that is not listed in `tools` keeps using your normal setup. `cct list` marks it as `(shared)`.
 

@@ -6,7 +6,7 @@ import { parseArguments } from '../ArgumentParser.js';
 import { Command, CommandSection } from '../Command.js';
 import { askQuestion } from '../output/InteractivePrompt.js';
 
-const USAGE = 'cct add <name> [--tools gh,git,azure,kube,npm,aws|all|none] [--git-name N] [--git-email E] [--unshare item,...] [--description D] [--yes]';
+const USAGE = `cct add <name> [--tools ${ISOLATED_TOOL_IDS.join(',')}|all|none] [--git-name N] [--git-email E] [--unshare item,...] [--description D] [--yes]`;
 
 export class AddProfileCommand extends Command {
   constructor(context) {

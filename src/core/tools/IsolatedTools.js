@@ -1,24 +1,55 @@
 import path from 'node:path';
+import { readToolToken } from './ToolTokenStore.js';
 
 class IsolatedTool {
-  constructor({ id, displayName, executableName = null, directories = [], environmentFor, loginArgumentsFor = null, loginNoticeFor = null }) {
+  constructor({
+    id,
+    displayName,
+    executableName = null,
+    directories = [],
+    environmentFor,
+    environmentVariableNames = null,
+    loginArgumentsFor = null,
+    loginNoticeFor = null,
+    tokenLogin = null,
+  }) {
     this.id = id;
     this.displayName = displayName;
     this.executableName = executableName;
     this.directories = directories;
     this.environmentFor = environmentFor;
+    this.explicitEnvironmentVariableNames = environmentVariableNames;
     this.loginArgumentsFor = loginArgumentsFor;
     this.loginNoticeFor = loginNoticeFor ?? (() => null);
+    this.tokenLogin = tokenLogin;
   }
 
   get environmentVariableNames() {
-    return Object.keys(this.environmentFor(''));
+    return this.explicitEnvironmentVariableNames ?? Object.keys(this.environmentFor(''));
   }
 
   get supportsLogin() {
-    return this.loginArgumentsFor !== null;
+    return this.loginArgumentsFor !== null || this.tokenLogin !== null;
+  }
+
+  usesTokenLoginFor(profile) {
+    return this.tokenLogin !== null && !profile.isDefault;
   }
 }
+
+const tokenTool = ({ id, displayName, environmentVariable, createTokenUrl, tokenLabel }) => new IsolatedTool({
+  id,
+  displayName,
+  executableName: id,
+  directories: [id],
+  environmentVariableNames: [environmentVariable],
+  environmentFor: profileRoot => {
+    const token = readToolToken(profileRoot, id);
+    return token ? { [environmentVariable]: token } : {};
+  },
+  loginArgumentsFor: () => ['login'],
+  tokenLogin: { environmentVariable, createTokenUrl, tokenLabel },
+});
 
 export const ISOLATED_TOOLS = Object.freeze([
   new IsolatedTool({
@@ -55,6 +86,20 @@ export const ISOLATED_TOOLS = Object.freeze([
     id: 'npm',
     displayName: 'npm',
     environmentFor: profileRoot => ({ NPM_CONFIG_USERCONFIG: path.join(profileRoot, 'npmrc') }),
+  }),
+  tokenTool({
+    id: 'railway',
+    displayName: 'Railway CLI',
+    environmentVariable: 'RAILWAY_API_TOKEN',
+    createTokenUrl: 'https://railway.com/account/tokens',
+    tokenLabel: 'Railway account token',
+  }),
+  tokenTool({
+    id: 'heroku',
+    displayName: 'Heroku CLI',
+    environmentVariable: 'HEROKU_API_KEY',
+    createTokenUrl: 'https://dashboard.heroku.com/account/applications',
+    tokenLabel: 'Heroku API key or authorization token',
   }),
   new IsolatedTool({
     id: 'aws',

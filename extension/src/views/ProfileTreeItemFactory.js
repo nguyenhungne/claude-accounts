@@ -34,20 +34,31 @@ class ProfileTreeItemFactory {
       }),
       this.#detail(overview, 'GitHub', describeSharedAccount(overview.githubAccount, overview.githubIsShared), 'github'),
       this.#detail(overview, 'Git', describeSharedAccount(overview.gitEmail, overview.gitIsShared), 'git-commit'),
-      this.#detail(overview, 'Separate', overview.isDefault ? 'your normal ~/.claude and CLI logins' : overview.separateItems.join(', '), 'lock'),
+      this.#detail(overview, 'Separate', overview.isDefault ? 'your normal ~/.claude and CLI logins' : overview.separateItems.join(', '), 'lock', overview.isDefault ? null : {
+        command: 'cct.chooseSeparateTools',
+        title: 'Choose Separate CLIs',
+        arguments: [overview.name],
+      }),
     ];
     if (overview.description && !overview.isDefault) details.push(this.#detail(overview, 'Note', overview.description, 'note'));
+    for (const { toolId, displayName, hasToken } of overview.tokenLogins) {
+      details.push(this.#detail(overview, displayName.replace(/ CLI$/, ''), hasToken ? 'token saved' : NOT_LOGGED_IN, 'key', {
+        command: 'cct.login',
+        title: hasToken ? 'Replace Token' : 'Log In',
+        arguments: [overview.name, toolId],
+      }));
+    }
     for (const folderPath of overview.boundFolders) details.push(this.#boundFolderItem(overview, folderPath));
     details.push(this.#connectionsGroupItem(overview, connections));
     return details;
   }
 
-  connectionItem(profileName, { server, configuredName, state }) {
+  connectionItem(profileName, { server, configuredName, needsReconfiguration, state }) {
     const { TreeItem, TreeItemCollapsibleState, ThemeIcon, ThemeColor, MarkdownString } = this.vscode;
     const isConnected = state === this.connectionStates.CONNECTED;
     const item = new TreeItem(server.displayName, TreeItemCollapsibleState.None);
     item.id = `profile:${profileName}:connection:${server.id}`;
-    item.description = state;
+    item.description = needsReconfiguration ? `${state}, needs repair` : state;
     item.iconPath = isConnected ? new ThemeIcon('pass-filled', new ThemeColor('charts.green')) : new ThemeIcon(server.iconId);
     item.contextValue = isConnected ? 'cctConnectionConnected' : 'cctConnectionAvailable';
     item.profileName = profileName;

@@ -2,7 +2,7 @@
   "name": "claude-accounts",
   "displayName": "Claude Accounts (cct)",
   "description": "Run Claude Code with several accounts side by side, chosen per workspace folder",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "cct-local",
   "private": true,
   "license": "UNLICENSED",
@@ -88,6 +88,12 @@
         "title": "Connect Service...",
         "category": "Claude Accounts",
         "icon": "$(plug)"
+      },
+      {
+        "command": "cct.chooseSeparateTools",
+        "title": "Choose Separate CLIs...",
+        "category": "Claude Accounts",
+        "icon": "$(lock)"
       },
       {
         "command": "cct.addProfile",
@@ -220,6 +226,11 @@
           "command": "cct.connectService",
           "when": "view == cct.profiles && viewItem == cctConnectionConnected",
           "group": "1_connection@1"
+        },
+        {
+          "command": "cct.chooseSeparateTools",
+          "when": "view == cct.profiles && viewItem == cctProfile",
+          "group": "2_account@3"
         }
       ]
     },

@@ -22,7 +22,12 @@ export class McpConnectionInspector {
     const signedInServerNames = this.#signedInServerNames(profile);
     return MCP_SERVER_CATALOG.map(server => {
       const configuredName = this.#configuredNameOf(server, configuredServers);
-      return { server, configuredName, state: this.#stateOf(configuredName, signedInServerNames) };
+      return {
+        server,
+        configuredName,
+        needsReconfiguration: configuredName !== null && !server.isConfiguredBy(configuredServers[configuredName]),
+        state: this.#stateOf(configuredName, signedInServerNames),
+      };
     });
   }
 

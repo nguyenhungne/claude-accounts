@@ -12,6 +12,31 @@ export function askQuestion(terminal, question) {
   });
 }
 
+export function askSecret(terminal, question) {
+  return new Promise(resolve => {
+    const { input, diagnostics } = terminal;
+    let secret = '';
+    const finish = value => {
+      input.off('keypress', handleKeypress);
+      input.setRawMode(false);
+      input.pause();
+      diagnostics.write('\n');
+      resolve(value);
+    };
+    const handleKeypress = (character, key = {}) => {
+      if (key.ctrl && key.name === 'c') return finish(null);
+      if (key.name === 'return' || key.name === 'enter') return finish(secret.trim());
+      if (key.name === 'backspace') secret = secret.slice(0, -1);
+      else if (character && !key.ctrl && !key.meta) secret += character;
+    };
+    diagnostics.write(question);
+    readline.emitKeypressEvents(input);
+    input.setRawMode(true);
+    input.resume();
+    input.on('keypress', handleKeypress);
+  });
+}
+
 export async function confirm(terminal, question) {
   return /^y(es)?$/i.test(await askQuestion(terminal, `${question} [y/N] `));
 }

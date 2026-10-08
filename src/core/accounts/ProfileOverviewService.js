@@ -1,9 +1,12 @@
+import { ISOLATED_TOOLS } from '../tools/IsolatedTools.js';
+
 export class ProfileOverviewService {
-  constructor({ profiles, bindings, accounts, environmentBaseline }) {
+  constructor({ profiles, bindings, accounts, environmentBaseline, toolTokens }) {
     this.profiles = profiles;
     this.bindings = bindings;
     this.accounts = accounts;
     this.environmentBaseline = environmentBaseline;
+    this.toolTokens = toolTokens;
   }
 
   describeAll(folder = null) {
@@ -34,6 +37,13 @@ export class ProfileOverviewService {
       gitIsShared: !profile.isDefault && !profile.isolates('git'),
       separateItems: profile.isDefault ? [] : ['claude', ...profile.toolIds],
       boundFolders: allBindings.filter(binding => binding.profile === profile.name).map(binding => binding.path),
+      tokenLogins: this.#tokenLoginsOf(profile),
     };
+  }
+
+  #tokenLoginsOf(profile) {
+    return ISOLATED_TOOLS
+      .filter(tool => tool.usesTokenLoginFor(profile) && profile.isolates(tool.id))
+      .map(tool => ({ toolId: tool.id, displayName: tool.displayName, hasToken: this.toolTokens.has(profile, tool.id) }));
   }
 }

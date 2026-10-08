@@ -21,14 +21,19 @@ export class ConnectServiceCommand extends Command {
     if (!server) throw new CctError(`unknown service '${serverId}' (supported: ${MCP_SERVER_IDS.join(', ')})`);
 
     const connection = this.services.mcpConnections.describeAll(profile).find(entry => entry.server.id === server.id);
-    const configuredName = connection.configuredName ?? this.#add(profile, server);
+    const configuredName = this.#ensureConfigured(profile, connection);
     this.terminal.highlight(`cct: in Claude, type /mcp, choose "${configuredName}" and pick Authenticate to sign in to ${server.displayName}`);
     return this.context.session.run(profile, requireExecutable('claude'), []);
   }
 
-  #add(profile, server) {
-    const owner = this.services.mcpInstaller.add(profile, server);
-    this.terminal.success(`cct: added ${server.displayName} (${server.url}) ${owner.isDefault ? 'for every profile that shares MCP servers' : `for '${profile.name}'`}`);
+  #ensureConfigured(profile, { server, configuredName, needsReconfiguration }) {
+    if (configuredName && !needsReconfiguration) return configuredName;
+    const { mcpInstaller } = this.services;
+    const owner = configuredName
+      ? mcpInstaller.reconfigure(profile, server, configuredName)
+      : mcpInstaller.add(profile, server);
+    const scope = owner.isDefault ? 'for every profile that shares MCP servers' : `for '${profile.name}'`;
+    this.terminal.success(`cct: ${configuredName ? 're-added' : 'added'} ${server.displayName} (${server.url}) ${scope}`);
     return server.id;
   }
 }

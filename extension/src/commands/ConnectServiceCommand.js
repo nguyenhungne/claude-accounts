@@ -12,7 +12,7 @@ class ConnectServiceCommand extends ExtensionCommand {
     if (!connection) return;
 
     const { server } = connection;
-    const configuredName = connection.configuredName ?? this.#add(profile, server);
+    const configuredName = this.#ensureConfigured(profile, connection);
     this.extension.refresh();
 
     const signInHint = `Type /mcp, choose "${configuredName}" and pick Authenticate. A browser window opens to sign in to ${server.displayName}.`;
@@ -20,10 +20,14 @@ class ConnectServiceCommand extends ExtensionCommand {
     this.vscode.window.showInformationMessage(`Claude Accounts: ${signInHint}`);
   }
 
-  #add(profile, server) {
-    const owner = this.services.mcpInstaller.add(profile, server);
+  #ensureConfigured(profile, { server, configuredName, needsReconfiguration }) {
+    if (configuredName && !needsReconfiguration) return configuredName;
+    const { mcpInstaller } = this.services;
+    const owner = configuredName
+      ? mcpInstaller.reconfigure(profile, server, configuredName)
+      : mcpInstaller.add(profile, server);
     const scope = owner.isDefault ? 'every profile that shares MCP servers' : `'${profile.name}' only`;
-    this.extension.output.appendLine(`Added ${server.displayName} (${server.url}) for ${scope}.`);
+    this.extension.output.appendLine(`${configuredName ? 'Re-added' : 'Added'} ${server.displayName} (${server.url}) for ${scope}.`);
     return server.id;
   }
 

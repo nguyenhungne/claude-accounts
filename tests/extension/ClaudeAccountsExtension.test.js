@@ -125,6 +125,22 @@ describe('Claude Accounts extension', () => {
     assert.deepEqual(fake.recorded.errorMessages, []);
   });
 
+  it('stores a Railway token pasted for a profile and shows it in the tree', async () => {
+    const profile = extension.services.profiles.get('personal');
+    extension.services.profiles.save(new extension.core.Profile({ ...profile, toolIds: [...profile.toolIds, 'railway'] }));
+    fake.scriptedAnswers.messages.push('Paste Token');
+    fake.scriptedAnswers.inputBoxes.push('railway-secret');
+
+    await vscode.commands.executeCommand('cct.login', 'personal', 'railway');
+
+    const environment = extension.services.environmentBuilder.processEnvironmentFor(extension.services.profiles.get('personal'));
+    assert.equal(environment.RAILWAY_API_TOKEN, 'railway-secret');
+    const personalItem = rootItems().find(item => item.label === 'personal');
+    const railwayRow = fake.recorded.treeViews[0].treeDataProvider.getChildren(personalItem).find(item => item.label === 'Railway');
+    assert.equal(railwayRow.description, 'token saved');
+    assert.deepEqual(fake.recorded.errorMessages, []);
+  });
+
   it('unbinds a folder from its tree item', async () => {
     const boundFolder = extension.services.bindings.closestTo(projectFolder).path;
     await vscode.commands.executeCommand('cct.unbindFolder', { folderPath: boundFolder });

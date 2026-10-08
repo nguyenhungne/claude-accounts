@@ -74,8 +74,8 @@ const vscode = {
   TreeItemCollapsibleState: { None: 0, Collapsed: 1, Expanded: 2 },
   StatusBarAlignment: { Left: 1, Right: 2 },
   TerminalLocation: { Panel: 1, Editor: 2 },
-  Uri: { file: fsPath => ({ fsPath, scheme: 'file' }) },
-  env: { appName: 'Visual Studio Code', appRoot: '/nonexistent-app-root' },
+  Uri: { file: fsPath => ({ fsPath, scheme: 'file' }), parse: value => ({ value, scheme: 'https' }) },
+  env: { appName: 'Visual Studio Code', appRoot: '/nonexistent-app-root', openExternal: async () => true },
   window: {
     activeTextEditor: undefined,
     createOutputChannel: () => ({ appendLine: () => {}, show: () => {}, dispose: () => {} }),

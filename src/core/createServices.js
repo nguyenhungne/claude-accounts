@@ -18,6 +18,7 @@ import { ProfileSynchronizer } from './sharing/ProfileSynchronizer.js';
 import { SettingsEnvironmentWriter } from './sharing/SettingsEnvironmentWriter.js';
 import { ShellIntegrationInstaller } from './shell/ShellIntegrationInstaller.js';
 import { GitConfigWriter } from './tools/GitConfigWriter.js';
+import { ToolTokenStore } from './tools/ToolTokenStore.js';
 
 export function createServices({ environment = process.env } = {}) {
   const appPaths = AppPaths.fromEnvironment(environment);
@@ -28,6 +29,7 @@ export function createServices({ environment = process.env } = {}) {
   const environmentBuilder = new ProfileEnvironmentBuilder(directories, environmentBaseline, environment);
   const linker = new ClaudeItemLinker(directories, appPaths);
   const accounts = new AccountInspector(directories);
+  const toolTokens = new ToolTokenStore(directories);
   const synchronizer = new ProfileSynchronizer({
     directories,
     environmentBuilder,
@@ -53,11 +55,12 @@ export function createServices({ environment = process.env } = {}) {
     resolver,
     accounts,
     lifecycle: new ProfileLifecycle({ profiles, bindings, linker, synchronizer }),
-    overview: new ProfileOverviewService({ profiles, bindings, accounts, environmentBaseline }),
     loginPlanner: new LoginPlanner(),
     editorWindows: new EditorWindowLauncher({ directories, environmentBuilder }),
     mcpConnections: new McpConnectionInspector(directories),
     mcpInstaller: new McpServerInstaller({ environmentBuilder }),
+    toolTokens,
+    overview: new ProfileOverviewService({ profiles, bindings, accounts, environmentBaseline, toolTokens }),
     shellIntegration: new ShellIntegrationInstaller(),
   };
 }
