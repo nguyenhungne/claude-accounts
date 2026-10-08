@@ -46,6 +46,11 @@ export class ProfileLifecycle {
     return { profile: updated, warnings: this.synchronizer.synchronize(updated) };
   }
 
+  setToolSeparate(profile, toolId, isSeparate) {
+    const toolIds = profile.toolIds.filter(id => id !== toolId);
+    return this.changeTools(profile, isSeparate ? [...toolIds, toolId] : toolIds);
+  }
+
   remove(profile) {
     if (profile.isDefault) throw new CctError('the default profile cannot be removed');
     this.linker.releaseAll(profile);

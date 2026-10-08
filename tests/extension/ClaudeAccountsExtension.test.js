@@ -125,19 +125,26 @@ describe('Claude Accounts extension', () => {
     assert.deepEqual(fake.recorded.errorMessages, []);
   });
 
-  it('stores a Railway token pasted for a profile and shows it in the tree', async () => {
-    const profile = extension.services.profiles.get('personal');
-    extension.services.profiles.save(new extension.core.Profile({ ...profile, toolIds: [...profile.toolIds, 'railway'] }));
+  it('lists every CLI and turns a shared one into a separate token login when clicked', async () => {
+    const provider = fake.recorded.treeViews[0].treeDataProvider;
+    const toolRows = () => {
+      const personalItem = rootItems().find(item => item.label === 'personal');
+      const cliGroup = provider.getChildren(personalItem).find(item => item.label === 'CLIs');
+      return Object.fromEntries(provider.getChildren(cliGroup).map(item => [item.toolId, item]));
+    };
+    const railwayBefore = toolRows().railway;
+    assert.equal(railwayBefore.description, 'shared with default');
+    assert.equal(railwayBefore.command.command, 'cct.makeToolSeparate');
+    assert.equal(toolRows().gh.contextValue, 'cctToolSeparate');
+
     fake.scriptedAnswers.messages.push('Paste Token');
     fake.scriptedAnswers.inputBoxes.push('railway-secret');
-
-    await vscode.commands.executeCommand('cct.login', 'personal', 'railway');
+    await vscode.commands.executeCommand(railwayBefore.command.command, ...railwayBefore.command.arguments);
 
     const environment = extension.services.environmentBuilder.processEnvironmentFor(extension.services.profiles.get('personal'));
     assert.equal(environment.RAILWAY_API_TOKEN, 'railway-secret');
-    const personalItem = rootItems().find(item => item.label === 'personal');
-    const railwayRow = fake.recorded.treeViews[0].treeDataProvider.getChildren(personalItem).find(item => item.label === 'Railway');
-    assert.equal(railwayRow.description, 'token saved');
+    assert.equal(toolRows().railway.description, 'token saved');
+    assert.equal(toolRows().railway.contextValue, 'cctToolSeparate');
     assert.deepEqual(fake.recorded.errorMessages, []);
   });
 

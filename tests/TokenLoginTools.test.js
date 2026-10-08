@@ -39,14 +39,20 @@ describe('token login tools (Railway, Heroku)', () => {
     assert.deepEqual(loginPlanner.availableTargets(deploy).map(({ id }) => id), ['claude', 'railway', 'heroku']);
   });
 
-  it('shows which token logins a profile has', () => {
+  it('lists every CLI with whether it is separate and which token logins are saved', () => {
     toolTokens.remove(deploy, 'heroku');
-    const deployOverview = overview.describe(deploy);
-    assert.deepEqual(deployOverview.tokenLogins, [
-      { toolId: 'railway', displayName: 'Railway CLI', hasToken: true },
-      { toolId: 'heroku', displayName: 'Heroku CLI', hasToken: false },
-    ]);
-    assert.deepEqual(overview.describe(Profile.createDefault()).tokenLogins, []);
+    const tools = Object.fromEntries(overview.describe(deploy).tools.map(tool => [tool.toolId, tool]));
+    assert.deepEqual(tools.railway, {
+      toolId: 'railway',
+      displayName: 'Railway CLI',
+      isSeparate: true,
+      canLogIn: true,
+      usesToken: true,
+      account: 'token saved',
+    });
+    assert.equal(tools.heroku.account, null);
+    assert.equal(tools.azure.isSeparate, false);
+    assert.equal(overview.describe(Profile.createDefault()).tools.every(tool => !tool.isSeparate && !tool.usesToken), true);
   });
 
   it('keeps tokens readable by the owner only and refuses to store one for the default profile', () => {

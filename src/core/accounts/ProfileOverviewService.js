@@ -37,13 +37,23 @@ export class ProfileOverviewService {
       gitIsShared: !profile.isDefault && !profile.isolates('git'),
       separateItems: profile.isDefault ? [] : ['claude', ...profile.toolIds],
       boundFolders: allBindings.filter(binding => binding.profile === profile.name).map(binding => binding.path),
-      tokenLogins: this.#tokenLoginsOf(profile),
+      tools: this.#toolsOf(profile, { githubAccount, gitEmail }),
     };
   }
 
-  #tokenLoginsOf(profile) {
-    return ISOLATED_TOOLS
-      .filter(tool => tool.usesTokenLoginFor(profile) && profile.isolates(tool.id))
-      .map(tool => ({ toolId: tool.id, displayName: tool.displayName, hasToken: this.toolTokens.has(profile, tool.id) }));
+  #toolsOf(profile, { githubAccount, gitEmail }) {
+    const knownAccounts = { gh: githubAccount, git: gitEmail };
+    return ISOLATED_TOOLS.map(tool => {
+      const isSeparate = !profile.isDefault && profile.isolates(tool.id);
+      const hasToken = tool.usesTokenLoginFor(profile) && this.toolTokens.has(profile, tool.id);
+      return {
+        toolId: tool.id,
+        displayName: tool.displayName,
+        isSeparate,
+        canLogIn: tool.supportsLogin,
+        usesToken: tool.usesTokenLoginFor(profile),
+        account: knownAccounts[tool.id] ?? (hasToken ? 'token saved' : null),
+      };
+    });
   }
 }

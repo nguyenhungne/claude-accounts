@@ -19,6 +19,7 @@ class ProfileTreeDataProvider {
       const connections = this.extension.services.mcpConnections.describeAll(element.overview.profile);
       return this.itemFactory.detailItems(element.overview, connections);
     }
+    if (element?.toolsOverview) return element.toolsOverview.tools.map(tool => this.itemFactory.toolItem(element.toolsOverview, tool));
     if (element?.connections) return element.connections.map(connection => this.itemFactory.connectionItem(element.profileName, connection));
     if (element) return [];
     try {

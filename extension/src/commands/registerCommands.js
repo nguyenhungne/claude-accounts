@@ -6,11 +6,13 @@ const { EditProfileCommand } = require('./EditProfileCommand');
 const { LaunchClaudeCommand } = require('./LaunchClaudeCommand');
 const { LaunchClaudeForWorkspaceCommand } = require('./LaunchClaudeForWorkspaceCommand');
 const { LoginCommand } = require('./LoginCommand');
+const { MakeToolSeparateCommand } = require('./MakeToolSeparateCommand');
 const { OpenProfileTerminalCommand } = require('./OpenProfileTerminalCommand');
 const { OpenWindowAsProfileCommand } = require('./OpenWindowAsProfileCommand');
 const { RefreshCommand } = require('./RefreshCommand');
 const { RemoveProfileCommand } = require('./RemoveProfileCommand');
 const { RevealProfileFolderCommand } = require('./RevealProfileFolderCommand');
+const { ShareToolCommand } = require('./ShareToolCommand');
 const { UnbindFolderCommand } = require('./UnbindFolderCommand');
 
 const COMMAND_TYPES = [
@@ -21,6 +23,8 @@ const COMMAND_TYPES = [
   LoginCommand,
   ConnectServiceCommand,
   ChooseSeparateToolsCommand,
+  MakeToolSeparateCommand,
+  ShareToolCommand,
   AddProfileCommand,
   EditProfileCommand,
   RemoveProfileCommand,

@@ -34,23 +34,45 @@ class ProfileTreeItemFactory {
       }),
       this.#detail(overview, 'GitHub', describeSharedAccount(overview.githubAccount, overview.githubIsShared), 'github'),
       this.#detail(overview, 'Git', describeSharedAccount(overview.gitEmail, overview.gitIsShared), 'git-commit'),
-      this.#detail(overview, 'Separate', overview.isDefault ? 'your normal ~/.claude and CLI logins' : overview.separateItems.join(', '), 'lock', overview.isDefault ? null : {
-        command: 'cct.chooseSeparateTools',
-        title: 'Choose Separate CLIs',
-        arguments: [overview.name],
-      }),
     ];
     if (overview.description && !overview.isDefault) details.push(this.#detail(overview, 'Note', overview.description, 'note'));
-    for (const { toolId, displayName, hasToken } of overview.tokenLogins) {
-      details.push(this.#detail(overview, displayName.replace(/ CLI$/, ''), hasToken ? 'token saved' : NOT_LOGGED_IN, 'key', {
-        command: 'cct.login',
-        title: hasToken ? 'Replace Token' : 'Log In',
-        arguments: [overview.name, toolId],
-      }));
-    }
     for (const folderPath of overview.boundFolders) details.push(this.#boundFolderItem(overview, folderPath));
+    details.push(this.#toolsGroupItem(overview));
     details.push(this.#connectionsGroupItem(overview, connections));
     return details;
+  }
+
+  toolItem(overview, tool) {
+    const { TreeItem, TreeItemCollapsibleState, ThemeIcon } = this.vscode;
+    const item = new TreeItem(tool.displayName, TreeItemCollapsibleState.None);
+    item.id = `profile:${overview.name}:tool:${tool.toolId}`;
+    item.profileName = overview.name;
+    item.toolId = tool.toolId;
+    if (overview.isDefault) {
+      item.description = tool.account ?? 'your normal login';
+      item.iconPath = new ThemeIcon('terminal');
+      item.contextValue = 'cctToolDefault';
+      item.tooltip = `${tool.displayName} uses its normal login in the default profile.`;
+      return item;
+    }
+    if (!tool.isSeparate) {
+      item.description = 'shared with default';
+      item.iconPath = new ThemeIcon('unlock');
+      item.contextValue = 'cctToolShared';
+      item.tooltip = `Click to give '${overview.name}' its own ${tool.displayName} login.`;
+      item.command = { command: 'cct.makeToolSeparate', title: 'Give This Profile Its Own Login', arguments: [item] };
+      return item;
+    }
+    item.description = tool.account ?? (tool.canLogIn ? NOT_LOGGED_IN : 'separate');
+    item.iconPath = new ThemeIcon(tool.usesToken ? 'key' : 'lock');
+    item.contextValue = 'cctToolSeparate';
+    item.tooltip = tool.usesToken
+      ? `${tool.displayName} signs in with a token for this profile. Click to ${tool.account ? 'replace' : 'paste'} it.`
+      : `${tool.displayName} has its own login in this profile.`;
+    if (tool.usesToken || (tool.canLogIn && !tool.account)) {
+      item.command = { command: 'cct.login', title: 'Log In', arguments: [overview.name, tool.toolId] };
+    }
+    return item;
   }
 
   connectionItem(profileName, { server, configuredName, needsReconfiguration, state }) {
@@ -84,6 +106,20 @@ class ProfileTreeItemFactory {
     item.iconPath = new this.vscode.ThemeIcon(iconId);
     item.contextValue = 'cctDetail';
     if (command) item.command = command;
+    return item;
+  }
+
+  #toolsGroupItem(overview) {
+    const { TreeItem, TreeItemCollapsibleState, ThemeIcon } = this.vscode;
+    const separateCount = overview.tools.filter(tool => tool.isSeparate).length;
+    const item = new TreeItem('CLIs', TreeItemCollapsibleState.Collapsed);
+    item.id = `profile:${overview.name}:tools`;
+    item.description = overview.isDefault ? 'your normal logins' : `${separateCount}/${overview.tools.length} separate`;
+    item.tooltip = 'Command line tools Claude runs as this profile. Separate ones have their own login.';
+    item.iconPath = new ThemeIcon('tools');
+    item.contextValue = overview.isDefault ? 'cctToolsDefault' : 'cctTools';
+    item.profileName = overview.name;
+    item.toolsOverview = overview;
     return item;
   }
 
