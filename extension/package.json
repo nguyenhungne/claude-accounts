@@ -1,0 +1,234 @@
+{
+  "name": "claude-accounts",
+  "displayName": "Claude Accounts (cct)",
+  "description": "Run Claude Code with several accounts side by side, chosen per workspace folder",
+  "version": "0.1.0",
+  "publisher": "cct-local",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "claude",
+    "claude code",
+    "accounts",
+    "profiles"
+  ],
+  "main": "./src/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": false
+  },
+  "scripts": {
+    "bundle-core": "node scripts/bundleCore.mjs",
+    "package": "npm run bundle-core && npx --yes @vscode/vsce package --skip-license --allow-missing-repository --no-dependencies --out dist/claude-accounts.vsix",
+    "install-extension": "npm run package && node scripts/installExtension.mjs"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cctAccounts",
+          "title": "Claude Accounts",
+          "icon": "media/accounts.svg"
+        }
+      ]
+    },
+    "views": {
+      "cctAccounts": [
+        {
+          "id": "cct.profiles",
+          "name": "Profiles",
+          "icon": "media/accounts.svg"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "cct.launchClaudeForWorkspace",
+        "title": "Start Claude for This Folder",
+        "category": "Claude Accounts",
+        "icon": "$(sparkle)"
+      },
+      {
+        "command": "cct.launchClaude",
+        "title": "Start Claude as...",
+        "category": "Claude Accounts",
+        "icon": "$(play)"
+      },
+      {
+        "command": "cct.openTerminal",
+        "title": "Open Terminal as...",
+        "category": "Claude Accounts",
+        "icon": "$(terminal)"
+      },
+      {
+        "command": "cct.openWindow",
+        "title": "Open New Window as...",
+        "category": "Claude Accounts",
+        "icon": "$(empty-window)"
+      },
+      {
+        "command": "cct.login",
+        "title": "Log In...",
+        "category": "Claude Accounts",
+        "icon": "$(sign-in)"
+      },
+      {
+        "command": "cct.addProfile",
+        "title": "Add Profile",
+        "category": "Claude Accounts",
+        "icon": "$(add)"
+      },
+      {
+        "command": "cct.editProfile",
+        "title": "Edit profile.json",
+        "category": "Claude Accounts",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "cct.removeProfile",
+        "title": "Remove Profile",
+        "category": "Claude Accounts",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "cct.bindWorkspaceFolder",
+        "title": "Use for a Workspace Folder",
+        "category": "Claude Accounts",
+        "icon": "$(pin)"
+      },
+      {
+        "command": "cct.unbindFolder",
+        "title": "Remove Folder Binding",
+        "category": "Claude Accounts",
+        "icon": "$(close)"
+      },
+      {
+        "command": "cct.revealProfileFolder",
+        "title": "Reveal Profile Folder",
+        "category": "Claude Accounts",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "cct.refresh",
+        "title": "Refresh",
+        "category": "Claude Accounts",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "cct.launchClaudeForWorkspace",
+          "when": "view == cct.profiles",
+          "group": "navigation@1"
+        },
+        {
+          "command": "cct.addProfile",
+          "when": "view == cct.profiles",
+          "group": "navigation@2"
+        },
+        {
+          "command": "cct.refresh",
+          "when": "view == cct.profiles",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "cct.launchClaude",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "inline@1"
+        },
+        {
+          "command": "cct.openTerminal",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "inline@2"
+        },
+        {
+          "command": "cct.unbindFolder",
+          "when": "view == cct.profiles && viewItem == cctBoundFolder",
+          "group": "inline@1"
+        },
+        {
+          "command": "cct.launchClaude",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "1_launch@1"
+        },
+        {
+          "command": "cct.openTerminal",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "1_launch@2"
+        },
+        {
+          "command": "cct.openWindow",
+          "when": "view == cct.profiles && viewItem == cctProfile",
+          "group": "1_launch@3"
+        },
+        {
+          "command": "cct.login",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "2_account@1"
+        },
+        {
+          "command": "cct.bindWorkspaceFolder",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "3_folder@1"
+        },
+        {
+          "command": "cct.editProfile",
+          "when": "view == cct.profiles && viewItem == cctProfile",
+          "group": "4_manage@1"
+        },
+        {
+          "command": "cct.revealProfileFolder",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "4_manage@2"
+        },
+        {
+          "command": "cct.removeProfile",
+          "when": "view == cct.profiles && viewItem == cctProfile",
+          "group": "4_manage@3"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Claude Accounts",
+      "properties": {
+        "cct.dataDirectory": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Folder where profiles and folder bindings are stored. Empty uses `CCT_HOME`, otherwise `~/.cct`. Keep it the same as the `cct` command line."
+        },
+        "cct.claudeTerminalLocation": {
+          "type": "string",
+          "enum": [
+            "editor",
+            "panel"
+          ],
+          "enumDescriptions": [
+            "Open Claude in an editor tab",
+            "Open Claude in the terminal panel"
+          ],
+          "default": "editor",
+          "description": "Where Claude terminals open."
+        },
+        "cct.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Claude account of the current folder in the status bar."
+        }
+      }
+    }
+  }
+}
