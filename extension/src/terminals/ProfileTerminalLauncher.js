@@ -4,7 +4,7 @@ class ProfileTerminalLauncher {
     this.ownTerminals = new Set();
   }
 
-  launchClaude(profile, folder) {
+  launchClaude(profile, folder, { message } = {}) {
     const { vscode } = this.extension;
     const location = this.extension.configuration.get('claudeTerminalLocation', 'editor') === 'editor'
       ? vscode.TerminalLocation.Editor
@@ -14,6 +14,7 @@ class ProfileTerminalLauncher {
       shellPath: this.extension.core.requireExecutable('claude'),
       cwd: folder ?? undefined,
       location,
+      message,
       iconPath: new vscode.ThemeIcon('sparkle'),
     });
   }

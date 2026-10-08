@@ -213,6 +213,18 @@ Options of `cct add`:
 
 Bind `default` to a subfolder to opt out of a parent binding: `cct bind default D:\personal\company-fork`.
 
+### Connections (MCP services)
+
+| Command | What it does |
+|---|---|
+| `cct connections [profile]` | ClickUp, Notion, Slack, Atlassian, Linear, Figma and Sentry, with the state per profile: `not added`, `not connected` or `connected` |
+| `cct connect <profile> <service>` | adds the official MCP server (user scope, so every profile sharing MCP servers gets it) if needed, then starts Claude as the profile. Type `/mcp`, choose the service and pick Authenticate |
+
+The server definition is shared, the OAuth sign-in is per profile: `default` can use the company Slack
+while `personal` signs in to another workspace. The state comes from the `mcpOAuth` entries in the
+profile's `.credentials.json` (only the entry names are read). On macOS the tokens live in the Keychain,
+so the state shows as `added, sign-in state unknown`.
+
 ### Other CLIs
 
 | Command | What it does |

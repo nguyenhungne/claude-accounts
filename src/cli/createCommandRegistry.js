@@ -1,11 +1,13 @@
 import { CommandRegistry } from './CommandRegistry.js';
 import { AddProfileCommand } from './commands/AddProfileCommand.js';
 import { BindFolderCommand } from './commands/BindFolderCommand.js';
+import { ConnectServiceCommand } from './commands/ConnectServiceCommand.js';
 import { EditProfileCommand } from './commands/EditProfileCommand.js';
 import { ExecCommand } from './commands/ExecCommand.js';
 import { HelpCommand } from './commands/HelpCommand.js';
 import { InstallShellIntegrationCommand } from './commands/InstallShellIntegrationCommand.js';
 import { ListBindingsCommand } from './commands/ListBindingsCommand.js';
+import { ListConnectionsCommand } from './commands/ListConnectionsCommand.js';
 import { ListProfilesCommand } from './commands/ListProfilesCommand.js';
 import { LoginCommand } from './commands/LoginCommand.js';
 import { OpenEditorWindowCommand } from './commands/OpenEditorWindowCommand.js';
@@ -38,6 +40,8 @@ const COMMAND_TYPES = [
   UnbindFolderCommand,
   ListBindingsCommand,
   WhichProfileCommand,
+  ListConnectionsCommand,
+  ConnectServiceCommand,
   ExecCommand,
   OpenShellCommand,
   UseProfileCommand,

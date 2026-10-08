@@ -1,0 +1,34 @@
+import { CctError } from '../../core/errors/CctError.js';
+import { findMcpServer, MCP_SERVER_IDS } from '../../core/mcp/McpServerCatalog.js';
+import { requireExecutable } from '../../core/platform/ExecutableLocator.js';
+import { Command, CommandSection } from '../Command.js';
+
+export class ConnectServiceCommand extends Command {
+  constructor(context) {
+    super(context, {
+      names: ['connect'],
+      section: CommandSection.CONNECTIONS,
+      usage: `cct connect <profile> <${MCP_SERVER_IDS.join('|')}>`,
+      summary: 'add the MCP service if needed, then start Claude as the profile to sign in with /mcp',
+    });
+  }
+
+  async execute(args) {
+    const [profileName, serverId] = args;
+    if (!profileName || !serverId) throw new CctError(`usage: ${this.usage}`);
+    const profile = this.services.profiles.get(profileName);
+    const server = findMcpServer(serverId);
+    if (!server) throw new CctError(`unknown service '${serverId}' (supported: ${MCP_SERVER_IDS.join(', ')})`);
+
+    const connection = this.services.mcpConnections.describeAll(profile).find(entry => entry.server.id === server.id);
+    const configuredName = connection.configuredName ?? this.#add(profile, server);
+    this.terminal.highlight(`cct: in Claude, type /mcp, choose "${configuredName}" and pick Authenticate to sign in to ${server.displayName}`);
+    return this.context.session.run(profile, requireExecutable('claude'), []);
+  }
+
+  #add(profile, server) {
+    const owner = this.services.mcpInstaller.add(profile, server);
+    this.terminal.success(`cct: added ${server.displayName} (${server.url}) ${owner.isDefault ? 'for every profile that shares MCP servers' : `for '${profile.name}'`}`);
+    return server.id;
+  }
+}

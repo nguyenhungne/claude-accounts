@@ -10,6 +10,8 @@ with the account chosen per workspace folder.
 - **Status bar item** with the account used for the current folder. Click it to start Claude.
 - **Add Profile wizard**: name, CLIs with their own login, git identity, description.
 - **Log in** to Claude, GitHub CLI or Azure CLI, each in its own terminal running as the profile.
+- **Connections** under each profile: ClickUp, Notion, Slack, Atlassian, Linear, Figma and Sentry with their
+  sign-in state. **Connect** adds the official MCP server if needed and opens Claude as the profile to sign in with `/mcp`.
 - **Use for a workspace folder**: bind a folder, so Claude, the status bar and the `cct` command line
   all pick that profile there.
 - **Open New Window as profile**: a separate window (own window state, shared extensions) where every

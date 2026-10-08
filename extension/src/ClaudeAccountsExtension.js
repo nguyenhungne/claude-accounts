@@ -28,7 +28,7 @@ class ClaudeAccountsExtension {
     this.terminals = new ProfileTerminalLauncher(this);
     this.profilePicker = new ProfilePicker(this);
     this.folderPicker = new WorkspaceFolderPicker(this);
-    this.treeProvider = new ProfileTreeDataProvider(this, new ProfileTreeItemFactory(vscode));
+    this.treeProvider = new ProfileTreeDataProvider(this, new ProfileTreeItemFactory(vscode, this.core.McpConnectionState));
     this.statusBar = new ProfileStatusBarItem(this);
     const treeView = vscode.window.createTreeView(PROFILES_VIEW_ID, { treeDataProvider: this.treeProvider, showCollapseAll: true });
 

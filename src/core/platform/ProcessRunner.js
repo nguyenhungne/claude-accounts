@@ -57,7 +57,13 @@ export function runDetached(executable, args, environment) {
   });
 }
 
-export function runCaptured(executable, args) {
-  const result = spawnSync(executable, args, { encoding: 'utf8' });
+export function runCaptured(executable, args, { environment = process.env } = {}) {
+  const request = buildSpawnRequest(executable, args);
+  const result = spawnSync(request.command, request.args, {
+    ...request.options,
+    env: environment,
+    encoding: 'utf8',
+    windowsHide: true,
+  });
   return { exitCode: result.status ?? 1, output: (result.stdout || '').trim(), errorOutput: (result.stderr || '').trim() };
 }

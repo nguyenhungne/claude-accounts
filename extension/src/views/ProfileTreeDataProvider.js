@@ -15,7 +15,11 @@ class ProfileTreeDataProvider {
   }
 
   getChildren(element) {
-    if (element?.overview) return this.itemFactory.detailItems(element.overview);
+    if (element?.overview) {
+      const connections = this.extension.services.mcpConnections.describeAll(element.overview.profile);
+      return this.itemFactory.detailItems(element.overview, connections);
+    }
+    if (element?.connections) return element.connections.map(connection => this.itemFactory.connectionItem(element.profileName, connection));
     if (element) return [];
     try {
       const folder = this.extension.workspaceFolders.current();

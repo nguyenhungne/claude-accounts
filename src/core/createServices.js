@@ -7,6 +7,8 @@ import { EditorWindowLauncher } from './editors/EditorWindowLauncher.js';
 import { EnvironmentBaseline } from './environment/EnvironmentBaseline.js';
 import { ProfileEnvironmentBuilder } from './environment/ProfileEnvironmentBuilder.js';
 import { LoginPlanner } from './login/LoginPlanner.js';
+import { McpConnectionInspector } from './mcp/McpConnectionInspector.js';
+import { McpServerInstaller } from './mcp/McpServerInstaller.js';
 import { ProfileDirectories } from './profiles/ProfileDirectories.js';
 import { ProfileLifecycle } from './profiles/ProfileLifecycle.js';
 import { ProfileRepository } from './profiles/ProfileRepository.js';
@@ -54,6 +56,8 @@ export function createServices({ environment = process.env } = {}) {
     overview: new ProfileOverviewService({ profiles, bindings, accounts, environmentBaseline }),
     loginPlanner: new LoginPlanner(),
     editorWindows: new EditorWindowLauncher({ directories, environmentBuilder }),
+    mcpConnections: new McpConnectionInspector(directories),
+    mcpInstaller: new McpServerInstaller({ environmentBuilder }),
     shellIntegration: new ShellIntegrationInstaller(),
   };
 }

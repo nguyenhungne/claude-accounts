@@ -2,7 +2,7 @@
   "name": "claude-accounts",
   "displayName": "Claude Accounts (cct)",
   "description": "Run Claude Code with several accounts side by side, chosen per workspace folder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "cct-local",
   "private": true,
   "license": "UNLICENSED",
@@ -84,6 +84,12 @@
         "icon": "$(sign-in)"
       },
       {
+        "command": "cct.connectService",
+        "title": "Connect Service...",
+        "category": "Claude Accounts",
+        "icon": "$(plug)"
+      },
+      {
         "command": "cct.addProfile",
         "title": "Add Profile",
         "category": "Claude Accounts",
@@ -161,6 +167,11 @@
           "group": "inline@1"
         },
         {
+          "command": "cct.connectService",
+          "when": "view == cct.profiles && viewItem == cctConnectionAvailable",
+          "group": "inline@1"
+        },
+        {
           "command": "cct.launchClaude",
           "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
           "group": "1_launch@1"
@@ -199,6 +210,16 @@
           "command": "cct.removeProfile",
           "when": "view == cct.profiles && viewItem == cctProfile",
           "group": "4_manage@3"
+        },
+        {
+          "command": "cct.connectService",
+          "when": "view == cct.profiles && viewItem =~ /^cctProfile/",
+          "group": "2_account@2"
+        },
+        {
+          "command": "cct.connectService",
+          "when": "view == cct.profiles && viewItem == cctConnectionConnected",
+          "group": "1_connection@1"
         }
       ]
     },

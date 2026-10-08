@@ -1,5 +1,6 @@
 const { AddProfileCommand } = require('./AddProfileCommand');
 const { BindWorkspaceFolderCommand } = require('./BindWorkspaceFolderCommand');
+const { ConnectServiceCommand } = require('./ConnectServiceCommand');
 const { EditProfileCommand } = require('./EditProfileCommand');
 const { LaunchClaudeCommand } = require('./LaunchClaudeCommand');
 const { LaunchClaudeForWorkspaceCommand } = require('./LaunchClaudeForWorkspaceCommand');
@@ -17,6 +18,7 @@ const COMMAND_TYPES = [
   OpenProfileTerminalCommand,
   OpenWindowAsProfileCommand,
   LoginCommand,
+  ConnectServiceCommand,
   AddProfileCommand,
   EditProfileCommand,
   RemoveProfileCommand,

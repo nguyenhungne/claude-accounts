@@ -98,6 +98,33 @@ describe('Claude Accounts extension', () => {
     assert.equal(terminal.shown, true);
   });
 
+  it('lists the connectable services of a profile with their sign-in state', () => {
+    workspace.writeDefaultClaudeFile('.claude.json', JSON.stringify({
+      oauthAccount: { emailAddress: 'me@company.com' },
+      mcpServers: { clickup: { type: 'http', url: 'https://mcp.clickup.com/mcp' } },
+    }));
+    const provider = fake.recorded.treeViews[0].treeDataProvider;
+    const personalItem = rootItems().find(item => item.label === 'personal');
+    const connectionsGroup = provider.getChildren(personalItem).find(item => item.label === 'Connections');
+    const connections = provider.getChildren(connectionsGroup);
+
+    assert.match(connectionsGroup.description, /^0\/\d+ connected$/);
+    assert.deepEqual(connections.slice(0, 3).map(item => item.label), ['ClickUp', 'Notion', 'Slack']);
+    assert.equal(connections[0].description, 'not connected');
+    assert.equal(connections[1].description, 'not added');
+    assert.equal(connections[0].contextValue, 'cctConnectionAvailable');
+    assert.equal(connections[0].command.command, 'cct.connectService');
+  });
+
+  it('starts Claude as the profile with sign-in instructions when connecting an added service', async t => {
+    if (!findExecutable('claude')) return t.skip('claude is not on PATH');
+    await vscode.commands.executeCommand('cct.connectService', { profileName: 'personal', serverId: 'clickup' });
+    const [terminal] = fake.recorded.terminals;
+    assert.equal(terminal.options.name, 'Claude · personal');
+    assert.match(terminal.options.message, /Type \/mcp, choose "clickup" and pick Authenticate/);
+    assert.deepEqual(fake.recorded.errorMessages, []);
+  });
+
   it('unbinds a folder from its tree item', async () => {
     const boundFolder = extension.services.bindings.closestTo(projectFolder).path;
     await vscode.commands.executeCommand('cct.unbindFolder', { folderPath: boundFolder });

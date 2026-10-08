@@ -2,6 +2,7 @@ export const CommandSection = Object.freeze({
   START: 'Start Claude',
   PROFILES: 'Profiles',
   FOLDERS: 'Folders',
+  CONNECTIONS: 'Connections',
   OTHER_TOOLS: 'Other CLIs',
   SETUP: 'Setup',
 });
